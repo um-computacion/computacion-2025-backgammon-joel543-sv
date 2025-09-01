@@ -1,0 +1,35 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+
+      - run:
+          name: Instalar dependencias
+          command: |
+            pip install --upgrade pip setuptools
+            pip install -r requirements.txt
+            pip install pytest coverage
+
+      - run:
+          name: Ejecutar pruebas con cobertura
+          command: |
+            coverage run --source=src -m pytest tests/
+            coverage report --fail-under=90
+            coverage xml
+
+      - store_artifacts:
+          path: coverage.xml
+          destination: coverage-report
+
+      - store_test_results:
+          path: test-results
+
+workflows:
+  version: 2
+  test-and-validate:
+    jobs:
+      - test
